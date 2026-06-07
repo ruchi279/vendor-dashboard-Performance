@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Performance Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f8;
+    --surface: #ffffff;
+    --surface2: #f5f6fa;
+    --border: #dde1ee;
+    --accent:  #1e6fff;
+    --accent2: #e84545;
+    --accent3: #f7941d;
+    --accent4: #17b26a;
+    --accent5: #7c3aed;
+    --text: #1a1f36;
+    --text2: #374151;
+    --muted: #8892a4;
+    --shadow: 0 2px 10px rgba(30,50,100,0.07);
+    --shadow-md: 0 6px 28px rgba(30,50,100,0.13);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 18px 22px 30px;
+  }
+
+  /* HEADER */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+    background:var(--surface);
+    border-radius:14px; padding:14px 22px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+  }
+  .logo-area { display:flex; align-items:center; gap:13px; }
+  .logo-icon {
+    width:42px; height:42px; border-radius:10px;
+    background:linear-gradient(135deg,#1e6fff,#7c3aed);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; color:#fff; font-weight:800; font-family:'Syne',sans-serif; letter-spacing:-1px;
+  }
+  .logo-area h1 { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:-0.02em; color:var(--text); }
+  .logo-area h1 span { color:var(--accent); }
+  .logo-area p { font-size:0.63rem; color:var(--muted); margin-top:2px; letter-spacing:0.07em; text-transform:uppercase; }
+  .header-right { display:flex; gap:10px; align-items:center; }
+  .badge { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 13px; font-size:0.65rem; color:var(--muted); }
+  .live-dot {
+    display:flex; align-items:center; gap:6px; font-size:0.65rem; color:var(--accent4); font-weight:600;
+    background:#ecfdf5; border:1px solid #bbf7d0; border-radius:20px; padding:5px 12px;
+  }
+  .live-dot::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--accent4); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* KPI ROW */
+  .kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:14px; }
+  .kpi-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px 12px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+    transition:transform .18s,box-shadow .18s;
+  }
+  .kpi-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .kpi-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--c,var(--accent)); border-radius:0 0 12px 12px; }
+  .kpi-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; margin-bottom:9px; }
+  .kpi-label { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px; font-weight:500; }
+  .kpi-value { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; color:var(--text); line-height:1; }
+  .kpi-badge { display:inline-flex; align-items:center; font-size:0.6rem; font-weight:600; padding:2px 7px; border-radius:10px; margin-top:6px; }
+  .up { background:#ecfdf5; color:#15803d; }
+  .dn { background:#fef2f2; color:#dc2626; }
+
+  /* GRIDS */
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+
+  /* CARD */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); }
+  .card-title {
+    font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; color:var(--text2);
+    margin-bottom:12px; display:flex; align-items:center; gap:8px;
+  }
+  .ct-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* DONUT */
+  .donut-wrap { display:flex; align-items:center; gap:12px; }
+  .donut-canvas-wrap { flex:0 0 130px; }
+  .donut-legend { flex:1; }
+  .legend-item { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:0.63rem; }
+  .legend-dot { width:8px; height:8px; border-radius:2px; margin-right:6px; flex-shrink:0; }
+  .legend-name { color:var(--text2); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .legend-val { color:var(--accent); font-weight:600; margin-left:4px; }
+  .donut-center { text-align:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .donut-center .big { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:800; color:var(--accent3); }
+  .donut-center .lbl { font-size:0.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-top:1px; }
+
+  /* LOW PERFORMERS */
+  .perf-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .perf-name { font-size:0.63rem; width:120px; color:var(--text2); flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500; }
+  .perf-track { flex:1; background:#f0f2f8; border-radius:6px; height:22px; overflow:hidden; }
+  .perf-fill { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:9px; font-size:0.63rem; font-weight:700; color:#fff; }
+
+  /* FOOTER */
+  footer { text-align:center; font-size:0.6rem; color:var(--muted); letter-spacing:0.07em; text-transform:uppercase; margin-top:6px; }
+
+  .chart-container { position:relative; width:100%; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">VP</div>
+    <div>
+      <h1>Vendor <span>Performance</span> Dashboard</h1>
+      <p>Beverages &amp; Spirits · Fiscal Year 2025</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge">📅 Last saved: Today 8:57 AM</div>
+    <div class="live-dot">Live data</div>
+  </div>
+</header>
+
+<!-- KPI CARDS -->
+<div class="kpi-row">
+  <div class="kpi-card" style="--c:#1e6fff">
+    <div class="kpi-icon" style="background:#eff6ff;">💰</div>
+    <div class="kpi-label">Total Sales ($)</div>
+    <div class="kpi-value">441.41M</div>
+    <div class="kpi-badge up">↑ 6.2% vs LY</div>
+  </div>
+  <div class="kpi-card" style="--c:#7c3aed">
+    <div class="kpi-icon" style="background:#f5f3ff;">🛒</div>
+    <div class="kpi-label">Total Purchase ($)</div>
+    <div class="kpi-value">307.34M</div>
+    <div class="kpi-badge up">↑ 4.1% vs LY</div>
+  </div>
+  <div class="kpi-card" style="--c:#17b26a">
+    <div class="kpi-icon" style="background:#ecfdf5;">📈</div>
+    <div class="kpi-label">Gross Profit ($)</div>
+    <div class="kpi-value">134.07M</div>
+    <div class="kpi-badge up">↑ 11.8% vs LY</div>
+  </div>
+  <div class="kpi-card" style="--c:#f7941d">
+    <div class="kpi-icon" style="background:#fff7ed;">🎯</div>
+    <div class="kpi-label">Profit Margin (%)</div>
+    <div class="kpi-value">38.7</div>
+    <div class="kpi-badge up">↑ 2.1 pts</div>
+  </div>
+  <div class="kpi-card" style="--c:#e84545">
+    <div class="kpi-icon" style="background:#fef2f2;">📦</div>
+    <div class="kpi-label">Unsold Capital ($)</div>
+    <div class="kpi-value">2.71M</div>
+    <div class="kpi-badge dn">↑ 0.4% vs LY</div>
+  </div>
+</div>
+
+<!-- ROW 2: Donut + Top Vendors Chart + Top Brands Chart -->
+<div class="grid-3">
+
+  <!-- DONUT -->
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#f7941d"></span>Purchase Contribution %</div>
+    <div class="donut-wrap">
+      <div class="donut-canvas-wrap"><canvas id="donutChart" height="130"></canvas></div>
+      <div class="donut-legend" id="donutLegend"></div>
+    </div>
+    <div class="donut-center">
+      <div class="big">65.7%</div>
+      <div class="lbl">Top 10 Vendors Share</div>
+    </div>
+  </div>
+
+  <!-- TOP VENDORS — horizontal bar chart -->
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#1e6fff"></span>Top Vendors By Sales</div>
+    <div class="chart-container"><canvas id="vendorChart"></canvas></div>
+  </div>
+
+  <!-- TOP BRANDS — horizontal bar chart -->
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#17b26a"></span>Top Brands By Sales</div>
+    <div class="chart-container"><canvas id="brandChart"></canvas></div>
+  </div>
+
+</div>
+
+<!-- ROW 3: Low Performers + Scatter -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#e84545"></span>Low Performing Vendors</div>
+    <div id="lowVendors"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#f7941d"></span>Low Performing Brands · Scatter</div>
+    <canvas id="scatterChart" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ROW 4: Monthly Trend + Margin -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#1e6fff"></span>Monthly Sales vs Purchase Trend</div>
+    <canvas id="lineChart" height="170"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ct-dot" style="background:#17b26a"></span>Gross Profit Margin % by Vendor</div>
+    <canvas id="marginChart" height="170"></canvas>
+  </div>
+</div>
+
+<footer>Vendor Performance Dashboard · FY2025 Beverages &amp; Spirits · Built with Chart.js</footer>
+
+<script>
+/* ─── DATA ─── */
+const vendors = [
+  { name:"Diageo North America",  sales:60.8, purchase:42.1, margin:30.8 },
+  { name:"Martinetti LLC",        sales:53.2, purchase:37.4, margin:29.7 },
+  { name:"Pernod Ricard USA",     sales:49.1, purchase:34.6, margin:29.5 },
+  { name:"Bacardi USA Inc.",      sales:41.5, purchase:29.8, margin:28.2 },
+  { name:"Jim Beam Brands",       sales:38.4, purchase:26.9, margin:30.0 },
+  { name:"Brown-Forman Co.",      sales:35.1, purchase:24.5, margin:30.2 },
+  { name:"Constellation Brands",  sales:30.7, purchase:21.4, margin:30.3 },
+  { name:"S&B I Galco",           sales:26.8, purchase:18.7, margin:30.2 },
+  { name:"Bacard USA L.L.C.",     sales:24.2, purchase:17.0, margin:29.8 },
+  { name:"Ultra Rivera",          sales:21.6, purchase:15.1, margin:30.1 },
+];
+const brands = [
+  { name:"Jack Daniels No.7",   sales:8.04 },
+  { name:"Grey Goose Vodka",    sales:7.26 },
+  { name:"Captain Morgan Sp.",  sales:6.48 },
+  { name:"Absolut 80 Proof",    sales:5.92 },
+  { name:"Jim Beam White",      sales:5.14 },
+  { name:"Smirnoff 80 Proof",   sales:4.76 },
+  { name:"Baileys Ir. Cream",   sales:4.20 },
+  { name:"Hennessy VS",         sales:3.88 },
+  { name:"Jameson Irish",       sales:3.52 },
+  { name:"S.M.S. Major",        sales:3.10 },
+];
+const lowVendors = [
+  { name:"Dunn Wine Brok.", score:0.766, color:"#1e6fff" },
+  { name:"Circa Wines",     score:0.756, color:"#1e6fff" },
+  { name:"Park Street Im.", score:0.751, color:"#1e6fff" },
+  { name:"Highland Win.",   score:0.708, color:"#e84545" },
+  { name:"Alisa Carr Bev.", score:0.615, color:"#e84545" },
+];
+const months  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const salesMo = [32,35,38,36,41,44,40,38,43,46,48,51];
+const purchMo = [22,24,26,25,29,31,28,27,30,32,33,35];
+
+/* colour palettes */
+const donutColors   = ["#1e6fff","#f7941d","#17b26a","#e84545","#7c3aed","#06b6d4","#f43f5e","#84cc16","#fb923c","#a855f7"];
+const vendorColors  = ["#1e6fff","#2e80ff","#4191ff","#56a0ff","#6ab0ff","#7dbfff","#91ceff","#a5deff"];
+const brandColors   = ["#17b26a","#1dc97a","#25e08a","#2ef09a","#48f3ab","#63f5bc","#7ef7cc","#99f9dc","#b3fbe9","#cdfdf5"];
+
+/* shared chart defaults */
+const hBarOpts = (labelColor) => ({
+  indexAxis: 'y',
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: ctx => ` $${ctx.parsed.x.toFixed(2)}M` } }
+  },
+  scales: {
+    x: {
+      ticks: { color:"#8892a4", font:{ family:"Inter", size:9 } },
+      grid:  { color:"#e8eaf2" },
+      border:{ display:false }
+    },
+    y: {
+      ticks: { color: labelColor || "#374151", font:{ family:"Inter", size:9.5 }, padding:4 },
+      grid:  { display:false },
+      border:{ display:false }
+    }
+  },
+  animation: { duration:1000 }
+});
+
+/* ─── DONUT ─── */
+new Chart(document.getElementById("donutChart"), {
+  type: "doughnut",
+  data: {
+    labels: vendors.map(v=>v.name),
+    datasets:[{ data:vendors.map(v=>v.purchase), backgroundColor:donutColors, borderWidth:2, borderColor:"#fff", hoverOffset:5 }]
+  },
+  options:{
+    cutout:"68%",
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.label}: $${ctx.raw.toFixed(1)}M`}} },
+    animation:{ animateRotate:true, duration:1200 }
+  }
+});
+const totalPurch = vendors.reduce((s,v)=>s+v.purchase,0);
+const leg = document.getElementById("donutLegend");
+vendors.slice(0,7).forEach((v,i)=>{
+  const pct = (v.purchase/totalPurch*100).toFixed(1);
+  leg.innerHTML += `<div class="legend-item"><span class="legend-dot" style="background:${donutColors[i]}"></span><span class="legend-name">${v.name.split(' ').slice(0,2).join(' ')}</span><span class="legend-val">${pct}%</span></div>`;
+});
+
+/* ─── TOP VENDORS — horizontal bar chart ─── */
+const vendorCanvas = document.getElementById("vendorChart");
+vendorCanvas.parentElement.style.height = (vendors.length * 28 + 20) + "px";
+new Chart(vendorCanvas, {
+  type: "bar",
+  data: {
+    labels: vendors.map(v => v.name),
+    datasets:[{
+      data: vendors.map(v => v.sales),
+      backgroundColor: vendorColors,
+      borderRadius: 4,
+      borderSkipped: false,
+      barThickness: 16
+    }]
+  },
+  options: {
+    ...hBarOpts("#1a1f36"),
+    scales: {
+      x: {
+        ticks:{ color:"#8892a4", font:{family:"Inter",size:9} },
+        grid:{ color:"#e8eaf2" }, border:{display:false},
+        title:{ display:true, text:"Sales ($M)", color:"#8892a4", font:{size:9} }
+      },
+      y: {
+        ticks:{ color:"#1a1f36", font:{family:"Inter",size:9}, padding:4 },
+        grid:{ display:false }, border:{display:false}
+      }
+    }
+  }
+});
+
+/* ─── TOP BRANDS — horizontal bar chart ─── */
+const brandCanvas = document.getElementById("brandChart");
+brandCanvas.parentElement.style.height = (brands.length * 28 + 20) + "px";
+new Chart(brandCanvas, {
+  type: "bar",
+  data: {
+    labels: brands.map(b => b.name),
+    datasets:[{
+      data: brands.map(b => b.sales),
+      backgroundColor: brandColors,
+      borderRadius: 4,
+      borderSkipped: false,
+      barThickness: 16
+    }]
+  },
+  options: {
+    ...hBarOpts("#1a1f36"),
+    scales: {
+      x: {
+        ticks:{ color:"#8892a4", font:{family:"Inter",size:9} },
+        grid:{ color:"#e8eaf2" }, border:{display:false},
+        title:{ display:true, text:"Sales ($M)", color:"#8892a4", font:{size:9} }
+      },
+      y: {
+        ticks:{ color:"#1a1f36", font:{family:"Inter",size:9}, padding:4 },
+        grid:{ display:false }, border:{display:false}
+      }
+    }
+  }
+});
+
+/* ─── LOW PERFORMING VENDORS ─── */
+lowVendors.forEach(v => {
+  const p = (v.score * 100).toFixed(0);
+  document.getElementById("lowVendors").innerHTML +=
+    `<div class="perf-row">
+      <div class="perf-name">${v.name}</div>
+      <div class="perf-track">
+        <div class="perf-fill" style="width:${p}%;background:${v.color};">${v.score.toFixed(3)}</div>
+      </div>
+    </div>`;
+});
+
+/* ─── SCATTER ─── */
+function randScatter(n,cx,cy,sp){
+  return Array.from({length:n},()=>({x:cx+(Math.random()-.5)*sp, y:cy+(Math.random()-.5)*sp}));
+}
+new Chart(document.getElementById("scatterChart"),{
+  type:"scatter",
+  data:{datasets:[
+    {label:"Underperforming", data:randScatter(60,3,2,4), backgroundColor:"rgba(232,69,69,0.55)",  pointRadius:4},
+    {label:"Mid-tier",        data:randScatter(80,6,5,5), backgroundColor:"rgba(30,111,255,0.45)", pointRadius:4},
+    {label:"Growing",         data:randScatter(40,9,8,3), backgroundColor:"rgba(23,178,106,0.55)", pointRadius:4},
+  ]},
+  options:{
+    plugins:{legend:{labels:{color:"#374151",font:{family:"Inter",size:10}}}},
+    scales:{
+      x:{title:{display:true,text:"Avg Sales ($M)",color:"#8892a4",font:{size:10}}, ticks:{color:"#8892a4",font:{size:9}}, grid:{color:"#e8eaf2"}},
+      y:{title:{display:true,text:"Profit Margin (%)",color:"#8892a4",font:{size:10}}, ticks:{color:"#8892a4",font:{size:9}}, grid:{color:"#e8eaf2"}}
+    }
+  }
+});
+
+/* ─── LINE ─── */
+new Chart(document.getElementById("lineChart"),{
+  type:"line",
+  data:{
+    labels:months,
+    datasets:[
+      {label:"Total Sales ($M)",    data:salesMo, borderColor:"#1e6fff", backgroundColor:"rgba(30,111,255,0.09)", tension:.4, fill:true, pointRadius:3, pointHoverRadius:6, pointBackgroundColor:"#1e6fff"},
+      {label:"Total Purchase ($M)", data:purchMo, borderColor:"#7c3aed", backgroundColor:"rgba(124,58,237,0.08)", tension:.4, fill:true, pointRadius:3, pointHoverRadius:6, pointBackgroundColor:"#7c3aed"},
+    ]
+  },
+  options:{
+    plugins:{legend:{labels:{color:"#374151",font:{family:"Inter",size:10}}}},
+    scales:{
+      x:{ticks:{color:"#8892a4",font:{size:9}}, grid:{color:"#e8eaf2"}},
+      y:{ticks:{color:"#8892a4",font:{size:9}}, grid:{color:"#e8eaf2"}}
+    }
+  }
+});
+
+/* ─── MARGIN BAR ─── */
+new Chart(document.getElementById("marginChart"),{
+  type:"bar",
+  data:{
+    labels: vendors.map(v=>v.name.split(' ')[0]),
+    datasets:[{
+      label:"Gross Profit Margin (%)",
+      data: vendors.map(v=>v.margin),
+      backgroundColor:["#1e6fff","#17b26a","#7c3aed","#f7941d","#e84545","#06b6d4","#84cc16","#fb923c","#a855f7","#f43f5e"],
+      borderRadius:5, borderSkipped:false
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:"#8892a4",font:{size:9},maxRotation:35}, grid:{display:false}},
+      y:{ticks:{color:"#8892a4",font:{size:9}}, grid:{color:"#e8eaf2"}, min:25, max:35}
+    }
+  }
+});
+</script>
+</body>
+</html>
