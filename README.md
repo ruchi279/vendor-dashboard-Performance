@@ -60,3 +60,77 @@ vendor-dashboard-Performance/
 ├── purchase_prices.csv
 ├── vendor_invoice.csv
 └── README.md
+
+ Analysis Performed
+Inventory Analysis
+Beginning vs Ending Inventory Comparison
+Inventory Turnover Analysis
+Stock Movement Tracking
+Vendor Analysis
+Top Vendors by Purchase Value
+Vendor Contribution Analysis
+Vendor Performance Ranking
+Purchase Analysis
+Purchase Trends
+Cost Analysis
+Pricing Comparison
+Business Insights
+Identification of high-performing vendors
+Inventory optimization opportunities
+Purchasing behavior analysis
+Data-driven recommendations
+
+
+
+
+
+ Dashboard Preview
+
+The dashboard includes:
+
+Vendor Performance Metrics
+Inventory Statistics
+Purchase Trends
+Pricing Analysis
+Interactive Visualizations
+
+
+ How to Run the Project
+1. Clone the Repository
+git clone https://github.com/ruchi279/vendor-dashboard-Performance.git
+2. Install Required Libraries
+pip install pandas numpy matplotlib seaborn
+3. Run Data Ingestion Script
+python ingestion_db.py
+4. Open Jupyter Notebook
+jupyter notebook
+5. Explore the Analysis
+
+Open:
+
+Exploratory Data Analysis.ipynb
+Vendor Performance Analysis.ipynb
+
+
+ Key Outcomes
+Evaluated vendor performance using business metrics
+Analyzed inventory and purchasing trends
+Generated actionable business insights
+Created visual reports for decision-making
+
+
+ Future Enhancements
+Real-time dashboard integration
+Machine Learning based vendor prediction
+Automated reporting system
+Advanced KPI tracking
+Interactive web application deployment
+
+
+ Author
+
+Ruchi Singh
+
+B.Tech Student | Data Analytics & Machine Learning Enthusiast
+
+GitHub: https://github.com/ruchi279
