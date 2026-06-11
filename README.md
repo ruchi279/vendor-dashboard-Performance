@@ -1,39 +1,53 @@
-Vendor Performance Analysis Dashboard
-Overview
+# Vendor Performance Analysis Dashboard
 
-This project analyzes vendor performance using inventory, purchase, and invoice data. The goal is to provide actionable insights into vendor efficiency, inventory management, purchasing trends, and business performance through data analysis and visualization.
+##  Project Overview
 
-Features
-Data ingestion and processing using Python
-Exploratory Data Analysis (EDA)
-Vendor performance evaluation
-Inventory analysis
-Purchase and pricing trend analysis
-Interactive dashboard for visualization
-Business insights and recommendations
-Dataset
+The Vendor Performance Analysis Dashboard is a data analytics project designed to evaluate vendor performance using inventory, purchase, pricing, and invoice data. The project helps businesses identify top-performing vendors, analyze purchasing patterns, monitor inventory movement, and generate actionable business insights through data visualization.
+
+---
+
+##  Features
+
+- Data ingestion and preprocessing
+- Exploratory Data Analysis (EDA)
+- Vendor performance evaluation
+- Inventory tracking and analysis
+- Purchase and pricing trend analysis
+- Interactive dashboard visualization
+- Business insights and recommendations
+
+---
+
+##  Dataset Used
 
 The project uses the following datasets:
 
-begin_inventory.csv
-end_inventory.csv
-purchases.csv
-purchase_prices.csv
-vendor_invoice.csv
+- `begin_inventory.csv`
+- `end_inventory.csv`
+- `purchase_prices.csv`
+- `vendor_invoice.csv`
 
-These datasets contain information related to inventory levels, purchases, pricing, and vendor transactions.
+These datasets contain information related to inventory levels, vendor purchases, pricing details, and invoice transactions.
 
-Technologies Used
-Python
-Pandas
-NumPy
-Matplotlib
-Seaborn
-SQLite
-Jupyter Notebook
-HTML
-GitHub Pages
-Project Structure
+---
+
+##  Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- SQLite
+- Jupyter Notebook
+- HTML
+- GitHub
+
+---
+
+##  Project Structure
+
+```text
 vendor-dashboard-Performance/
 │
 ├── Exploratory Data Analysis.ipynb
@@ -46,35 +60,3 @@ vendor-dashboard-Performance/
 ├── purchase_prices.csv
 ├── vendor_invoice.csv
 └── README.md
-Key Insights
-Identified top-performing vendors based on sales and profitability.
-Analyzed inventory turnover and stock movement.
-Examined purchase patterns and vendor contributions.
-Generated data-driven recommendations for vendor management.
-Dashboard Preview
-
-The dashboard presents:
-
-Vendor-wise performance metrics
-Inventory statistics
-Purchase trends
-Pricing analysis
-Interactive visualizations
-How to Run
-Clone the repository:
-git clone https://github.com/ruchi279/vendor-dashboard-Performance.git
-Install dependencies:
-pip install pandas numpy matplotlib seaborn
-Run the data ingestion script:
-python ingestion_db.py
-Open the Jupyter notebooks for analysis:
-jupyter notebook
-
-Future Improvements
--Real-time data updates
--Advanced machine learning predictions
--Vendor ranking system
--Interactive filtering and reporting
-
-Author
-Ruchi Singh
